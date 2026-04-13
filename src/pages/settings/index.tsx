@@ -241,39 +241,42 @@ const SettingsPage = () => {
             </Button>
           </View>
 
+          {/* 获取我的OpenID按钮 - 始终显示 */}
+          <View className="mb-4 pb-4 border-b border-gray-100">
+            <Button
+              className="w-full bg-gray-100 text-gray-700"
+              onClick={handleGetMyOpenid}
+            >
+              <Text className="text-sm">📱 获取我的 OpenID</Text>
+            </Button>
+            <Text className="text-xs text-gray-500 mt-2 text-center">
+              点击获取OpenID，然后添加为管理员
+            </Text>
+          </View>
+
           {admins.length === 0 ? (
             <View className="text-center py-6">
-              <Text className="text-xs text-gray-500">暂无管理员</Text>
+              <Text className="text-xs text-gray-500">暂无管理员，请先获取OpenID后添加</Text>
             </View>
           ) : (
-            <>
-              {admins.map((admin) => (
-                <View
-                  key={admin.id}
-                  className="flex items-center justify-between bg-gray-50 rounded-lg p-3 mb-2"
-                >
-                  <View>
-                    <Text className="text-sm font-semibold text-gray-900">{admin.nickname}</Text>
-                    <Text className="text-xs text-gray-500">{admin.openid}</Text>
-                  </View>
-                  <Button
-                    className="bg-red-50"
-                    size="sm"
-                    onClick={() => handleDeleteAdmin(admin.id)}
-                  >
-                    <Trash2 size={14} color="#dc2626" />
-                  </Button>
+            admins.map((admin) => (
+              <View
+                key={admin.id}
+                className="flex items-center justify-between bg-gray-50 rounded-lg p-3 mb-2"
+              >
+                <View>
+                  <Text className="text-sm font-semibold text-gray-900">{admin.nickname}</Text>
+                  <Text className="text-xs text-gray-500">{admin.openid}</Text>
                 </View>
-              ))}
-              <View className="mt-4 pt-4 border-t border-gray-200">
                 <Button
-                  className="w-full bg-gray-100 text-gray-700"
-                  onClick={handleGetMyOpenid}
+                  className="bg-red-50"
+                  size="sm"
+                  onClick={() => handleDeleteAdmin(admin.id)}
                 >
-                  <Text className="text-sm">获取我的 OpenID</Text>
+                  <Trash2 size={14} color="#dc2626" />
                 </Button>
               </View>
-            </>
+            ))
           )}
         </View>
 
