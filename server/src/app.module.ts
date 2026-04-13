@@ -5,9 +5,10 @@ import { WorksModule } from './modules/works/works.module'
 import { EditorsModule } from './modules/editors/editors.module'
 import { TasksModule } from './modules/tasks/tasks.module'
 import { AdminsModule } from './modules/admins/admins.module'
+import { AuthModule } from './modules/auth/auth.module'
 
 @Module({
-  imports: [WorksModule, EditorsModule, TasksModule, AdminsModule],
+  imports: [WorksModule, EditorsModule, TasksModule, AdminsModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })

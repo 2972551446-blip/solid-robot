@@ -141,6 +141,45 @@ const SettingsPage = () => {
       console.error('订阅消息授权失败', error)
     }
   }
+
+  const handleGetMyOpenid = async () => {
+    try {
+      Taro.showLoading({ title: '获取中...' })
+
+      // 1. 获取登录code
+      const loginRes = await Taro.login()
+      const code = loginRes.code
+
+      // 2. 调用后端接口获取openid
+      const res = await Network.request({
+        url: '/api/auth/openid',
+        method: 'POST',
+        data: { code }
+      })
+
+      if (res.data && res.data.data) {
+        const openid = res.data.data.openid
+
+        // 3. 复制到剪贴板
+        await Taro.setClipboardData({ data: openid })
+
+        Taro.hideLoading()
+        Taro.showModal({
+          title: 'OpenID',
+          content: openid,
+          showCancel: false,
+          confirmText: '已复制到剪贴板'
+        })
+      }
+    } catch (error) {
+      Taro.hideLoading()
+      console.error('获取OpenID失败', error)
+      Taro.showToast({
+        title: '获取失败，请重试',
+        icon: 'none'
+      })
+    }
+  }
   return (
     <View className="min-h-screen bg-gray-50 pb-20">
       <View className="bg-white p-4 border-b border-gray-200">
@@ -207,24 +246,34 @@ const SettingsPage = () => {
               <Text className="text-xs text-gray-500">暂无管理员</Text>
             </View>
           ) : (
-            admins.map((admin) => (
-              <View
-                key={admin.id}
-                className="flex items-center justify-between bg-gray-50 rounded-lg p-3 mb-2"
-              >
-                <View>
-                  <Text className="text-sm font-semibold text-gray-900">{admin.nickname}</Text>
-                  <Text className="text-xs text-gray-500">{admin.openid}</Text>
-                </View>
-                <Button
-                  className="bg-red-50"
-                  size="sm"
-                  onClick={() => handleDeleteAdmin(admin.id)}
+            <>
+              {admins.map((admin) => (
+                <View
+                  key={admin.id}
+                  className="flex items-center justify-between bg-gray-50 rounded-lg p-3 mb-2"
                 >
-                  <Trash2 size={14} color="#dc2626" />
+                  <View>
+                    <Text className="text-sm font-semibold text-gray-900">{admin.nickname}</Text>
+                    <Text className="text-xs text-gray-500">{admin.openid}</Text>
+                  </View>
+                  <Button
+                    className="bg-red-50"
+                    size="sm"
+                    onClick={() => handleDeleteAdmin(admin.id)}
+                  >
+                    <Trash2 size={14} color="#dc2626" />
+                  </Button>
+                </View>
+              ))}
+              <View className="mt-4 pt-4 border-t border-gray-200">
+                <Button
+                  className="w-full bg-gray-100 text-gray-700"
+                  onClick={handleGetMyOpenid}
+                >
+                  <Text className="text-sm">获取我的 OpenID</Text>
                 </Button>
               </View>
-            ))
+            </>
           )}
         </View>
 
