@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Picker } from '@tarojs/components'
+import Taro from '@tarojs/taro'
 import { Network } from '@/network'
-import { Calendar, TrendingUp, User } from 'lucide-react-taro'
+import { Calendar, TrendingUp, User, Trash2 } from 'lucide-react-taro'
 
 interface Work {
   id: number
@@ -133,6 +134,34 @@ const StatisticsPage = () => {
     setEndDate(formatDate(lastDay))
   }
 
+  const handleDeleteWork = async (id: number, editorName: string) => {
+    Taro.showModal({
+      title: '确认删除',
+      content: `确定要删除 ${editorName} 的这条记录吗？`,
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            await Network.request({
+              url: `/api/works/${id}`,
+              method: 'DELETE'
+            })
+            fetchStatistics()
+            Taro.showToast({
+              title: '删除成功',
+              icon: 'success'
+            })
+          } catch (error) {
+            console.error('删除失败', error)
+            Taro.showToast({
+              title: '删除失败',
+              icon: 'none'
+            })
+          }
+        }
+      }
+    })
+  }
+
   return (
     <View className="min-h-screen bg-gray-50 pb-20">
       <View className="bg-white p-4 border-b border-gray-200">
@@ -242,11 +271,19 @@ const StatisticsPage = () => {
         {works.map((work) => (
           <View key={work.id} className="bg-white rounded-xl p-4 mb-3 border border-gray-100">
             <View className="flex justify-between items-start mb-2">
-              <View>
+              <View className="flex-1">
                 <Text className="block text-sm font-semibold text-gray-900">{work.title}</Text>
                 <Text className="block text-xs text-gray-500 mt-1">{work.editors?.name}</Text>
               </View>
-              <Text className="text-sm font-bold text-blue-600">¥{(work.count * work.price).toFixed(2)}</Text>
+              <View className="flex items-center gap-2">
+                <Text className="text-sm font-bold text-blue-600">¥{(work.count * work.price).toFixed(2)}</Text>
+                <View
+                  className="w-8 h-8 bg-red-50 rounded-full flex items-center justify-center ml-2"
+                  onClick={() => handleDeleteWork(work.id, work.editors?.name || '未知剪辑师')}
+                >
+                  <Trash2 size={16} color="#dc2626" />
+                </View>
+              </View>
             </View>
             <View className="flex justify-between items-center bg-gray-50 rounded-lg px-3 py-2">
               <Text className="text-xs text-gray-500">{work.date}</Text>
