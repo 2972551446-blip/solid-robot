@@ -1,7 +1,34 @@
 import { View, Text } from '@tarojs/components'
-import { Settings, Info } from 'lucide-react-taro'
+import { useState, useEffect } from 'react'
+import Taro from '@tarojs/taro'
+import { Settings, Info, Bell } from 'lucide-react-taro'
+import { Switch } from '@/components/ui/switch'
 
 const SettingsPage = () => {
+  const [reminderEnabled, setReminderEnabled] = useState(false)
+
+  useEffect(() => {
+    loadSettings()
+  }, [])
+
+  const loadSettings = () => {
+    try {
+      const enabled = Taro.getStorageSync('reminderEnabled')
+      setReminderEnabled(enabled === true)
+    } catch (error) {
+      console.error('加载设置失败', error)
+    }
+  }
+
+  const handleReminderToggle = (checked: boolean) => {
+    try {
+      Taro.setStorageSync('reminderEnabled', checked)
+      setReminderEnabled(checked)
+      console.log('提醒设置已更新', checked)
+    } catch (error) {
+      console.error('保存设置失败', error)
+    }
+  }
   return (
     <View className="min-h-screen bg-gray-50 pb-20">
       <View className="bg-white p-4 border-b border-gray-200">
@@ -10,6 +37,24 @@ const SettingsPage = () => {
       </View>
 
       <View className="p-4">
+        {/* 提醒设置 */}
+        <View className="bg-white rounded-xl p-4 mb-4 border border-gray-100">
+          <View className="flex items-center justify-between">
+            <View className="flex items-center gap-3">
+              <Bell size={20} color="#2563eb" />
+              <View>
+                <Text className="block text-sm font-semibold text-gray-900">每晚提醒</Text>
+                <Text className="block text-xs text-gray-500">每天晚上11点提醒录入</Text>
+              </View>
+            </View>
+            <Switch
+              checked={reminderEnabled}
+              onCheckedChange={handleReminderToggle}
+            />
+          </View>
+        </View>
+
+        {/* 功能说明 */}
         <View className="bg-white rounded-xl p-4 mb-4 border border-gray-100">
           <View className="flex items-center gap-3 mb-3">
             <Settings size={20} color="#2563eb" />
