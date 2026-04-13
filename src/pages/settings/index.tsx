@@ -122,26 +122,6 @@ const SettingsPage = () => {
     })
   }
 
-  const handleSubscribeMessage = async () => {
-    try {
-      // TODO: 实现订阅消息授权
-      // Taro.requestSubscribeMessage({
-      //   tmplIds: ['模板ID'],
-      //   success: (res) => {
-      //     console.log('订阅成功', res)
-      //   }
-      // })
-
-      Taro.showToast({
-        title: '请等待管理员配置订阅消息模板',
-        icon: 'none',
-        duration: 3000
-      })
-    } catch (error) {
-      console.error('订阅消息授权失败', error)
-    }
-  }
-
   const handleGetMyOpenid = async () => {
     try {
       Taro.showLoading({ title: '获取中...' })
@@ -207,19 +187,28 @@ const SettingsPage = () => {
 
         {/* 订阅消息授权 */}
         {reminderEnabled && (
-          <View className="bg-blue-50 rounded-xl p-4 mb-4 border border-blue-100">
+          <View className="bg-yellow-50 rounded-xl p-4 mb-4 border border-yellow-100">
             <View className="flex items-center gap-3 mb-2">
-              <Bell size={20} color="#2563eb" />
-              <Text className="block text-sm font-semibold text-blue-900">订阅消息授权</Text>
+              <Bell size={20} color="#d97706" />
+              <Text className="block text-sm font-semibold text-yellow-900">订阅消息配置</Text>
             </View>
-            <Text className="block text-xs text-blue-700 mb-3">
-              开启提醒后，需要授权订阅消息才能收到通知
+            <Text className="block text-xs text-yellow-700 mb-3 leading-relaxed">
+              需要先配置以下内容才能使用订阅消息：{'\n\n'}
+              1. 在微信公众平台申请订阅消息模板{'\n'}
+              2. 配置小程序 AppID 和 AppSecret{'\n'}
+              3. 配置模板ID
             </Text>
             <Button
-              className="bg-blue-600"
-              onClick={handleSubscribeMessage}
+              className="bg-yellow-600"
+              onClick={() => {
+                Taro.showModal({
+                  title: '配置说明',
+                  content: '订阅消息功能需要配置：\n\n1. 在微信公众平台申请订阅消息模板\n2. 在后端代码中配置AppID和AppSecret\n3. 配置模板ID\n\n联系技术人员完成配置',
+                  showCancel: false
+                })
+              }}
             >
-              <Text className="text-white text-sm">授权订阅消息</Text>
+              <Text className="text-white text-sm">查看配置说明</Text>
             </Button>
           </View>
         )}
