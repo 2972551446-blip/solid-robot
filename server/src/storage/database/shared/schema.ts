@@ -71,3 +71,39 @@ export const holidays = pgTable(
     index("holidays_year_idx").on(table.year),
   ]
 )
+
+// 管理员表
+export const admins = pgTable(
+  "admins",
+  {
+    id: serial("id").primaryKey(),
+    openid: varchar("openid", { length: 100 }).notNull().unique(),
+    nickname: varchar("nickname", { length: 100 }),
+    is_active: boolean("is_active").default(true).notNull(),
+    created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updated_at: timestamp("updated_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("admins_openid_idx").on(table.openid),
+    index("admins_is_active_idx").on(table.is_active),
+  ]
+)
+
+// 订阅消息记录表
+export const subscription_logs = pgTable(
+  "subscription_logs",
+  {
+    id: serial("id").primaryKey(),
+    admin_id: integer("admin_id").notNull().references(() => admins.id, { onDelete: "cascade" }),
+    template_id: varchar("template_id", { length: 100 }),
+    date: date("date").notNull(),
+    status: varchar("status", { length: 20 }).notNull(), // sent, failed
+    error_message: varchar("error_message", { length: 500 }),
+    created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("subscription_logs_admin_id_idx").on(table.admin_id),
+    index("subscription_logs_date_idx").on(table.date),
+    index("subscription_logs_status_idx").on(table.status),
+  ]
+)

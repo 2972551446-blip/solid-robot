@@ -4,9 +4,10 @@ import { AppService } from '@/app.service'
 import { WorksModule } from './modules/works/works.module'
 import { EditorsModule } from './modules/editors/editors.module'
 import { TasksModule } from './modules/tasks/tasks.module'
+import { AdminsModule } from './modules/admins/admins.module'
 
 @Module({
-  imports: [WorksModule, EditorsModule, TasksModule],
+  imports: [WorksModule, EditorsModule, TasksModule, AdminsModule],
   controllers: [AppController],
   providers: [AppService],
 })
