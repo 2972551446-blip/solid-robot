@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Picker } from '@tarojs/components'
 import { Network } from '@/network'
-import { Calendar, TrendingUp } from 'lucide-react-taro'
+import { Calendar, TrendingUp, User } from 'lucide-react-taro'
 
 interface Work {
   id: number
@@ -16,8 +16,17 @@ interface Work {
   }
 }
 
+interface EditorStats {
+  editor_id: number
+  editor_name: string
+  total_count: number
+  total_amount: number
+  average_price: number
+}
+
 const StatisticsPage = () => {
   const [works, setWorks] = useState<Work[]>([])
+  const [editorStats, setEditorStats] = useState<EditorStats[]>([])
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [totalCount, setTotalCount] = useState(0)
@@ -67,6 +76,34 @@ const StatisticsPage = () => {
 
         setTotalCount(count)
         setTotalAmount(amount)
+
+        // 计算每个剪辑师的统计
+        const statsMap = new Map<number, EditorStats>()
+        worksData.forEach((work: Work) => {
+          const editorName = work.editors?.name || '未知'
+          if (!statsMap.has(work.editor_id)) {
+            statsMap.set(work.editor_id, {
+              editor_id: work.editor_id,
+              editor_name: editorName,
+              total_count: 0,
+              total_amount: 0,
+              average_price: 0
+            })
+          }
+          const stats = statsMap.get(work.editor_id)!
+          stats.total_count += work.count
+          stats.total_amount += work.count * work.price
+        })
+
+        // 计算平均单价
+        const statsArray = Array.from(statsMap.values()).map(stats => ({
+          ...stats,
+          average_price: stats.total_count > 0 ? stats.total_amount / stats.total_count : 0
+        }))
+
+        // 按总金额降序排序
+        statsArray.sort((a, b) => b.total_amount - a.total_amount)
+        setEditorStats(statsArray)
       }
     } catch (error) {
       console.error('获取统计数据失败', error)
@@ -169,7 +206,39 @@ const StatisticsPage = () => {
           </View>
         </View>
 
-        <Text className="block text-sm font-semibold text-gray-900 mb-3">明细列表</Text>
+        {/* 剪辑师统计 */}
+        <Text className="block text-sm font-semibold text-gray-900 mb-3">剪辑师统计</Text>
+        {editorStats.map((stat) => (
+          <View key={stat.editor_id} className="bg-white rounded-xl p-4 mb-3 border border-gray-100">
+            <View className="flex items-center gap-3 mb-3">
+              <View className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
+                <User size={20} color="#2563eb" />
+              </View>
+              <View className="flex-1">
+                <Text className="block text-base font-semibold text-gray-900">{stat.editor_name}</Text>
+                <Text className="block text-xs text-gray-500">¥{stat.average_price.toFixed(2)}/条</Text>
+              </View>
+            </View>
+            <View className="grid grid-cols-2 gap-3">
+              <View className="bg-gray-50 rounded-lg p-3">
+                <Text className="block text-xs text-gray-500 mb-1">稿件数量</Text>
+                <Text className="block text-lg font-bold text-blue-600">{stat.total_count}</Text>
+              </View>
+              <View className="bg-gray-50 rounded-lg p-3">
+                <Text className="block text-xs text-gray-500 mb-1">总金额</Text>
+                <Text className="block text-lg font-bold text-green-600">¥{stat.total_amount.toFixed(2)}</Text>
+              </View>
+            </View>
+          </View>
+        ))}
+
+        {editorStats.length === 0 && works.length > 0 && (
+          <View className="text-center py-8">
+            <Text className="block text-gray-500">暂无剪辑师数据</Text>
+          </View>
+        )}
+
+        <Text className="block text-sm font-semibold text-gray-900 mb-3 mt-4">明细列表</Text>
         {works.map((work) => (
           <View key={work.id} className="bg-white rounded-xl p-4 mb-3 border border-gray-100">
             <View className="flex justify-between items-start mb-2">
