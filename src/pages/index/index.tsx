@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Picker } from '@tarojs/components'
-import { useLoad, useDidShow } from '@tarojs/taro'
+import Taro, { useLoad, useDidShow } from '@tarojs/taro'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Calendar, User } from 'lucide-react-taro'
+import { Calendar, User, Trash2 } from 'lucide-react-taro'
 import { Network } from '@/network'
 
 interface Editor {
@@ -21,9 +21,22 @@ interface EditorWork {
   price: number
 }
 
+interface SubmittedWork {
+  id: number
+  editor_id: number
+  date: string
+  count: number
+  title: string
+  price: number
+  editor_name: string
+  is_overtime: boolean
+  created_at: string
+}
+
   const IndexPage = () => {
   const [editors, setEditors] = useState<Editor[]>([])
   const [works, setWorks] = useState<EditorWork[]>([])
+  const [submittedWorks, setSubmittedWorks] = useState<SubmittedWork[]>([])
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [loading, setLoading] = useState(false)
 
@@ -39,6 +52,10 @@ interface EditorWork {
     initializeWorks()
   }, [editors])
 
+  useEffect(() => {
+    fetchSubmittedWorks()
+  }, [date])
+
   const fetchEditors = async () => {
     try {
       const res = await Network.request({
@@ -50,6 +67,24 @@ interface EditorWork {
       }
     } catch (error) {
       console.error('获取剪辑师列表失败', error)
+    }
+  }
+
+  const fetchSubmittedWorks = async () => {
+    try {
+      const res = await Network.request({
+        url: '/api/works/by-range',
+        method: 'GET',
+        data: {
+          startDate: date,
+          endDate: date
+        }
+      })
+      if (res.data && res.data.data) {
+        setSubmittedWorks(res.data.data)
+      }
+    } catch (error) {
+      console.error('获取已录入数据失败', error)
     }
   }
 
@@ -102,10 +137,23 @@ interface EditorWork {
       })
       console.log('批量录入成功', res.data)
       initializeWorks()
+      fetchSubmittedWorks()
     } catch (error) {
       console.error('录入失败', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDeleteWork = async (id: number) => {
+    try {
+      await Network.request({
+        url: `/api/works/${id}`,
+        method: 'DELETE'
+      })
+      fetchSubmittedWorks()
+    } catch (error) {
+      console.error('删除失败', error)
     }
   }
 
@@ -218,6 +266,59 @@ interface EditorWork {
             <Text className="block text-sm text-white">{loading ? '提交中...' : '批量提交'}</Text>
           </Button>
         </View>
+
+        {/* 已录入列表 */}
+        {submittedWorks.length > 0 && (
+          <View className="mt-6">
+            <Text className="block text-sm font-semibold text-gray-900 mb-3">已录入 ({submittedWorks.length})</Text>
+            {submittedWorks.map((work) => (
+              <View key={work.id} className="bg-white rounded-xl p-4 mb-3 border border-gray-100">
+                <View className="flex items-center justify-between mb-2">
+                  <View className="flex items-center gap-2">
+                    <View className="w-8 h-8 bg-green-50 rounded-full flex items-center justify-center">
+                      <User size={16} color="#16a34a" />
+                    </View>
+                    <View>
+                      <Text className="block text-sm font-semibold text-gray-900">{work.editor_name}</Text>
+                      <Text className="block text-xs text-gray-500">{work.title}</Text>
+                    </View>
+                  </View>
+                  <Button
+                    className="bg-red-50"
+                    size="sm"
+                    onClick={() => {
+                      Taro.showModal({
+                        title: '确认删除',
+                        content: `确定要删除 ${work.editor_name} 的这条记录吗？`,
+                        success: (res) => {
+                          if (res.confirm) {
+                            handleDeleteWork(work.id)
+                          }
+                        }
+                      })
+                    }}
+                  >
+                    <Trash2 size={16} color="#dc2626" />
+                  </Button>
+                </View>
+                <View className="flex justify-between items-center bg-gray-50 rounded-lg p-2">
+                  <View>
+                    <Text className="block text-xs text-gray-500">数量</Text>
+                    <Text className="block text-sm font-semibold text-gray-900">{work.count} 条</Text>
+                  </View>
+                  <View>
+                    <Text className="block text-xs text-gray-500">单价</Text>
+                    <Text className="block text-sm font-semibold text-gray-900">¥{work.price}</Text>
+                  </View>
+                  <View>
+                    <Text className="block text-xs text-gray-500">金额</Text>
+                    <Text className="block text-sm font-semibold text-green-600">¥{(work.count * work.price).toFixed(2)}</Text>
+                  </View>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
     </View>
   )

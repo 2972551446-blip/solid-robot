@@ -137,4 +137,15 @@ export class WorksService {
     if (error) throw new HttpException(`查询失败: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR)
     return data
   }
+
+  async delete(id: number) {
+    const client = getSupabaseClient()
+    const { error } = await client
+      .from('works')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw new HttpException(`删除失败: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR)
+    return { message: '删除成功' }
+  }
 }

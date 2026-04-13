@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Query, Body, HttpCode, HttpStatus } from '@nestjs/common'
+import { Controller, Post, Get, Delete, Param, Query, Body, HttpCode, HttpStatus } from '@nestjs/common'
 import { WorksService } from './works.service'
 
 @Controller('works')
@@ -62,6 +62,16 @@ export class WorksController {
       code: 200,
       message: '查询成功',
       data: result
+    }
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  async delete(@Param('id') id: string) {
+    await this.worksService.delete(parseInt(id))
+    return {
+      code: 200,
+      message: '删除成功'
     }
   }
 }
