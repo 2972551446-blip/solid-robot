@@ -220,10 +220,10 @@ const StatisticsPage = () => {
           <View className="bg-blue-50 rounded-xl p-4">
             <View className="flex items-center gap-2 mb-2">
               <TrendingUp size={16} color="#2563eb" />
-              <Text className="text-xs text-gray-600">总数量</Text>
+              <Text className="text-xs text-gray-600">总时长</Text>
             </View>
             <Text className="block text-2xl font-bold text-blue-600">{totalCount}</Text>
-            <Text className="block text-xs text-gray-500 mt-1">条稿件</Text>
+            <Text className="block text-xs text-gray-500 mt-1">分钟</Text>
           </View>
           <View className="bg-green-50 rounded-xl p-4">
             <View className="flex items-center gap-2 mb-2">
@@ -245,12 +245,12 @@ const StatisticsPage = () => {
               </View>
               <View className="flex-1">
                 <Text className="block text-base font-semibold text-gray-900">{stat.editor_name}</Text>
-                <Text className="block text-xs text-gray-500">¥{stat.average_price.toFixed(2)}/条</Text>
+                <Text className="block text-xs text-gray-500">¥{stat.average_price.toFixed(2)}/分钟</Text>
               </View>
             </View>
             <View className="grid grid-cols-2 gap-3">
               <View className="bg-gray-50 rounded-lg p-3">
-                <Text className="block text-xs text-gray-500 mb-1">稿件数量</Text>
+                <Text className="block text-xs text-gray-500 mb-1">时长（分钟）</Text>
                 <Text className="block text-lg font-bold text-blue-600">{stat.total_count}</Text>
               </View>
               <View className="bg-gray-50 rounded-lg p-3">
@@ -287,7 +287,7 @@ const StatisticsPage = () => {
             </View>
             <View className="flex justify-between items-center bg-gray-50 rounded-lg px-3 py-2">
               <Text className="text-xs text-gray-500">{work.date}</Text>
-              <Text className="text-xs text-gray-600">{work.count} 条 × ¥{work.price}</Text>
+              <Text className="text-xs text-gray-600">{work.count} 分钟 × ¥{work.price}</Text>
             </View>
           </View>
         ))}

@@ -57,7 +57,7 @@ const IndexPage = () => {
     const worksData = editors.map((editor) => ({
       editor_id: editor.id,
       editor_name: editor.name,
-      count: editor.default_count,
+      count: editor.default_count || 2,  // 默认2分钟
       title: '常规剪辑稿件',
       price: editor.price
     }))
@@ -163,7 +163,7 @@ const IndexPage = () => {
               </View>
               <View className="flex-1">
                 <Text className="block text-sm font-semibold text-gray-900">{work.editor_name}</Text>
-                <Text className="block text-xs text-gray-500">¥{work.price}/条</Text>
+                <Text className="block text-xs text-gray-500">¥{work.price}/分钟</Text>
               </View>
             </View>
 
@@ -180,14 +180,14 @@ const IndexPage = () => {
               </View>
             </View>
 
-            {/* 稿件数量 */}
+            {/* 时长 */}
             <View>
-              <Text className="block text-xs text-gray-600 mb-1">稿件数量</Text>
+              <Text className="block text-xs text-gray-600 mb-1">时长（分钟）</Text>
               <View className="bg-gray-50 rounded-lg px-3 py-2">
                 <Input
                   className="w-full bg-transparent text-sm"
                   type="number"
-                  placeholder="输入稿件数量"
+                  placeholder="输入时长"
                   value={work.count.toString()}
                   onInput={(e) => updateWorkCount(work.editor_id, e.detail.value)}
                 />

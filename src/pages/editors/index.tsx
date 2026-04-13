@@ -17,8 +17,8 @@ const EditorsPage = () => {
   const [editors, setEditors] = useState<Editor[]>([])
   const [showAddModal, setShowAddModal] = useState(false)
   const [newName, setNewName] = useState('')
-  const [newPrice, setNewPrice] = useState('16')
-  const [newDefaultCount, setNewDefaultCount] = useState('1')
+  const [newPrice, setNewPrice] = useState('8')
+  const [newDefaultCount, setNewDefaultCount] = useState('2')
   const [editingPrices, setEditingPrices] = useState<Record<number, string>>({})
   const [editingCounts, setEditingCounts] = useState<Record<number, string>>({})
 
@@ -50,7 +50,7 @@ const EditorsPage = () => {
       return
     }
     if (!newDefaultCount || parseInt(newDefaultCount) <= 0) {
-      console.log('请输入有效的默认稿件数量')
+      console.log('请输入有效的默认时长')
       return
     }
 
@@ -66,8 +66,8 @@ const EditorsPage = () => {
       })
       console.log('添加成功', res.data)
       setNewName('')
-      setNewPrice('16')
-      setNewDefaultCount('1')
+      setNewPrice('8')
+      setNewDefaultCount('2')
       setShowAddModal(false)
       fetchEditors()
     } catch (error) {
@@ -155,7 +155,7 @@ const EditorsPage = () => {
               </Button>
             </View>
             <View className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 mb-2">
-              <Text className="block text-sm text-gray-600">单价（元/条）</Text>
+              <Text className="block text-sm text-gray-600">单价（元/分钟）</Text>
               <View className="flex items-center gap-2">
                 <Input
                   className="w-20 bg-white text-right text-sm"
@@ -173,7 +173,7 @@ const EditorsPage = () => {
               </View>
             </View>
             <View className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
-              <Text className="block text-sm text-gray-600">默认稿件数量</Text>
+              <Text className="block text-sm text-gray-600">默认时长（分钟）</Text>
               <View className="flex items-center gap-2">
                 <Input
                   className="w-20 bg-white text-right text-sm"
@@ -187,7 +187,7 @@ const EditorsPage = () => {
                     }
                   }}
                 />
-                <Text className="text-sm text-gray-500">条</Text>
+                <Text className="text-sm text-gray-500">分钟</Text>
               </View>
             </View>
           </View>
@@ -214,7 +214,7 @@ const EditorsPage = () => {
               />
             </View>
             <View className="mb-4">
-              <Text className="block text-sm font-medium text-gray-700 mb-2">单价（元/条）</Text>
+              <Text className="block text-sm font-medium text-gray-700 mb-2">单价（元/分钟）</Text>
               <Input
                 className="w-full bg-gray-50"
                 type="number"
@@ -224,11 +224,11 @@ const EditorsPage = () => {
               />
             </View>
             <View className="mb-6">
-              <Text className="block text-sm font-medium text-gray-700 mb-2">默认稿件数量</Text>
+              <Text className="block text-sm font-medium text-gray-700 mb-2">默认时长（分钟）</Text>
               <Input
                 className="w-full bg-gray-50"
                 type="number"
-                placeholder="输入默认稿件数量"
+                placeholder="输入默认时长"
                 value={newDefaultCount}
                 onInput={(e) => setNewDefaultCount(e.detail.value)}
               />
