@@ -21,11 +21,10 @@ interface EditorWork {
   price: number
 }
 
-const IndexPage = () => {
+  const IndexPage = () => {
   const [editors, setEditors] = useState<Editor[]>([])
   const [works, setWorks] = useState<EditorWork[]>([])
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
-  const [showDatePicker, setShowDatePicker] = useState(false)
   const [loading, setLoading] = useState(false)
 
   useLoad(() => {
@@ -124,30 +123,12 @@ const IndexPage = () => {
 
   const handleDateChange = (e: any) => {
     const { value } = e.detail
-    const year = value[0]
-    const month = String(value[1] + 1).padStart(2, '0')
-    const day = String(value[2]).padStart(2, '0')
-    const selectedDate = `${year}-${month}-${day}`
-    setDate(selectedDate)
-    setShowDatePicker(false)
-  }
-
-  const generateYears = () => {
-    const currentYear = new Date().getFullYear()
-    const years: number[] = []
-    for (let i = 0; i < 5; i++) {
-      years.push(currentYear - i)
-    }
-    return years
-  }
-
-  const generateMonths = () => {
-    return Array.from({ length: 12 }, (_, i) => i)
-  }
-
-  const generateDays = (year: number, month: number) => {
-    const daysInMonth = new Date(year, month + 1, 0).getDate()
-    return Array.from({ length: daysInMonth }, (_, i) => i + 1)
+    const selectedDate = new Date(value)
+    const year = selectedDate.getFullYear()
+    const month = String(selectedDate.getMonth() + 1).padStart(2, '0')
+    const day = String(selectedDate.getDate()).padStart(2, '0')
+    const formattedDate = `${year}-${month}-${day}`
+    setDate(formattedDate)
   }
 
   return (
@@ -161,13 +142,16 @@ const IndexPage = () => {
         {/* 日期选择 */}
         <View className="bg-white rounded-xl p-4 mb-4 border border-gray-100">
           <Text className="block text-sm font-semibold text-gray-900 mb-3">录入日期</Text>
-          <View
-            className="bg-gray-50 rounded-lg px-4 py-3 flex items-center justify-between"
-            onClick={() => setShowDatePicker(true)}
+          <Picker
+            mode="date"
+            value={date}
+            onChange={handleDateChange}
           >
-            <Text className="block text-sm text-gray-700">{date}</Text>
-            <Calendar size={20} color="#2563eb" />
-          </View>
+            <View className="bg-gray-50 rounded-lg px-4 py-3 flex items-center justify-between">
+              <Text className="block text-sm text-gray-700">{date}</Text>
+              <Calendar size={20} color="#2563eb" />
+            </View>
+          </Picker>
         </View>
 
         {/* 批量录入列表 */}
@@ -235,39 +219,6 @@ const IndexPage = () => {
           </Button>
         </View>
       </View>
-
-      {/* 日期选择器 */}
-      {showDatePicker && (
-        <View className="fixed inset-0 bg-black bg-opacity-50 flex items-end z-50">
-          <View className="bg-white rounded-t-xl w-full p-4">
-            <View className="flex justify-between items-center mb-4">
-              <Text className="text-sm text-gray-600" onClick={() => setShowDatePicker(false)}>
-                取消
-              </Text>
-              <Text
-                className="text-sm font-semibold text-blue-600"
-                onClick={() => setShowDatePicker(false)}
-              >
-                确认
-              </Text>
-            </View>
-            <Picker
-              mode="multiSelector"
-              range={[
-                generateYears(),
-                generateMonths(),
-                generateDays(new Date().getFullYear(), new Date().getMonth())
-              ]}
-              onChange={handleDateChange}
-              value={[0, new Date().getMonth(), new Date().getDate() - 1]}
-            >
-              <View className="h-48 flex items-center justify-center bg-gray-50 rounded-lg">
-                <Text className="text-gray-500">请选择日期</Text>
-              </View>
-            </Picker>
-          </View>
-        </View>
-      )}
     </View>
   )
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { View, Text } from '@tarojs/components'
+import { View, Text, Picker } from '@tarojs/components'
 import { Network } from '@/network'
 import { Calendar, TrendingUp } from 'lucide-react-taro'
 
@@ -18,16 +18,40 @@ interface Work {
 
 const StatisticsPage = () => {
   const [works, setWorks] = useState<Work[]>([])
-  const [startDate] = useState(new Date().toISOString().split('T')[0])
-  const [endDate] = useState(new Date().toISOString().split('T')[0])
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   const [totalCount, setTotalCount] = useState(0)
   const [totalAmount, setTotalAmount] = useState(0)
 
   useEffect(() => {
-    fetchStatistics()
+    initCurrentMonth()
+  }, [])
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      fetchStatistics()
+    }
   }, [startDate, endDate])
 
+  const initCurrentMonth = () => {
+    const now = new Date()
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+
+    setStartDate(formatDate(firstDay))
+    setEndDate(formatDate(lastDay))
+  }
+
+  const formatDate = (date: Date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   const fetchStatistics = async () => {
+    if (!startDate || !endDate) return
+
     try {
       const res = await Network.request({
         url: '/api/works/by-range',
@@ -49,6 +73,29 @@ const StatisticsPage = () => {
     }
   }
 
+  const handleStartChange = (e: any) => {
+    const { value } = e.detail
+    setStartDate(value)
+  }
+
+  const handleEndChange = (e: any) => {
+    const { value } = e.detail
+    setEndDate(value)
+  }
+
+  const handleCurrentMonth = () => {
+    initCurrentMonth()
+  }
+
+  const handleLastMonth = () => {
+    const now = new Date()
+    const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    const lastDay = new Date(now.getFullYear(), now.getMonth(), 0)
+
+    setStartDate(formatDate(firstDay))
+    setEndDate(formatDate(lastDay))
+  }
+
   return (
     <View className="min-h-screen bg-gray-50 pb-20">
       <View className="bg-white p-4 border-b border-gray-200">
@@ -57,14 +104,49 @@ const StatisticsPage = () => {
       </View>
 
       <View className="p-4">
+        {/* 快捷按钮 */}
         <View className="flex gap-3 mb-4">
-          <View className="flex-1 bg-gray-50 rounded-xl px-4 py-3">
-            <Text className="block text-xs text-gray-500 mb-1">开始日期</Text>
-            <Text className="block text-sm font-semibold text-gray-900">{startDate}</Text>
+          <View
+            className="flex-1 bg-blue-50 rounded-xl px-4 py-3 text-center border border-blue-100"
+            onClick={handleCurrentMonth}
+          >
+            <Text className="block text-sm font-semibold text-blue-600">本月</Text>
           </View>
-          <View className="flex-1 bg-gray-50 rounded-xl px-4 py-3">
+          <View
+            className="flex-1 bg-gray-50 rounded-xl px-4 py-3 text-center border border-gray-100"
+            onClick={handleLastMonth}
+          >
+            <Text className="block text-sm font-semibold text-gray-600">上月</Text>
+          </View>
+        </View>
+
+        {/* 日期选择 */}
+        <View className="flex gap-3 mb-4">
+          <View className="flex-1 bg-white rounded-xl px-4 py-3 border border-gray-100">
+            <Text className="block text-xs text-gray-500 mb-1">开始日期</Text>
+            <Picker
+              mode="date"
+              value={startDate}
+              onChange={handleStartChange}
+            >
+              <View className="flex items-center justify-between">
+                <Text className="block text-sm font-semibold text-gray-900">{startDate}</Text>
+                <Calendar size={18} color="#2563eb" />
+              </View>
+            </Picker>
+          </View>
+          <View className="flex-1 bg-white rounded-xl px-4 py-3 border border-gray-100">
             <Text className="block text-xs text-gray-500 mb-1">结束日期</Text>
-            <Text className="block text-sm font-semibold text-gray-900">{endDate}</Text>
+            <Picker
+              mode="date"
+              value={endDate}
+              onChange={handleEndChange}
+            >
+              <View className="flex items-center justify-between">
+                <Text className="block text-sm font-semibold text-gray-900">{endDate}</Text>
+                <Calendar size={18} color="#2563eb" />
+              </View>
+            </Picker>
           </View>
         </View>
 
