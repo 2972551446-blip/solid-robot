@@ -76,7 +76,7 @@ const SettingsPage = () => {
             <Text className="block text-sm font-semibold text-blue-900">注意事项</Text>
           </View>
           <Text className="block text-xs text-blue-700 leading-relaxed">
-            • 数据保存1年，自动清理过期数据{'\n'}
+            • 数据保存3年，自动清理过期数据{'\n'}
             • 每天晚上11点提醒未录入数据{'\n'}
             • 价格修改后，已有数据不受影响
           </Text>

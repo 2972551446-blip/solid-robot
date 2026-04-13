@@ -19,6 +19,8 @@ const EditorsPage = () => {
   const [newName, setNewName] = useState('')
   const [newPrice, setNewPrice] = useState('16')
   const [newDefaultCount, setNewDefaultCount] = useState('1')
+  const [editingPrices, setEditingPrices] = useState<Record<number, string>>({})
+  const [editingCounts, setEditingCounts] = useState<Record<number, string>>({})
 
   useEffect(() => {
     fetchEditors()
@@ -91,7 +93,7 @@ const EditorsPage = () => {
       const res = await Network.request({
         url: `/api/editors/${id}`,
         method: 'PUT',
-        data: { price }
+        data: { price: parseFloat(price) }
       })
       console.log('更新成功', res.data)
       fetchEditors()
@@ -112,6 +114,14 @@ const EditorsPage = () => {
     } catch (error) {
       console.error('更新失败', error)
     }
+  }
+
+  const handlePriceInput = (id: number, value: string) => {
+    setEditingPrices(prev => ({ ...prev, [id]: value }))
+  }
+
+  const handleCountInput = (id: number, value: string) => {
+    setEditingCounts(prev => ({ ...prev, [id]: value }))
   }
 
   return (
@@ -150,9 +160,14 @@ const EditorsPage = () => {
                 <Input
                   className="w-20 bg-white text-right text-sm"
                   type="number"
-                  value={editor.price.toString()}
-                  onInput={(e) => setNewPrice(e.detail.value)}
-                  onBlur={() => handleUpdatePrice(editor.id, editor.price.toString())}
+                  value={editingPrices[editor.id] ?? editor.price.toString()}
+                  onInput={(e) => handlePriceInput(editor.id, e.detail.value)}
+                  onBlur={() => {
+                    const price = editingPrices[editor.id]
+                    if (price && price !== editor.price.toString()) {
+                      handleUpdatePrice(editor.id, price)
+                    }
+                  }}
                 />
                 <Text className="text-sm text-gray-500">元</Text>
               </View>
@@ -163,9 +178,14 @@ const EditorsPage = () => {
                 <Input
                   className="w-20 bg-white text-right text-sm"
                   type="number"
-                  value={editor.default_count.toString()}
-                  onInput={(e) => setNewDefaultCount(e.detail.value)}
-                  onBlur={() => handleUpdateDefaultCount(editor.id, editor.default_count.toString())}
+                  value={editingCounts[editor.id] ?? editor.default_count.toString()}
+                  onInput={(e) => handleCountInput(editor.id, e.detail.value)}
+                  onBlur={() => {
+                    const count = editingCounts[editor.id]
+                    if (count && count !== editor.default_count.toString()) {
+                      handleUpdateDefaultCount(editor.id, count)
+                    }
+                  }}
                 />
                 <Text className="text-sm text-gray-500">条</Text>
               </View>
