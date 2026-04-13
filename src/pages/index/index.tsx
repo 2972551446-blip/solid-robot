@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text } from '@tarojs/components'
-import { useLoad } from '@tarojs/taro'
+import { useLoad, useDidShow } from '@tarojs/taro'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Calendar, User } from 'lucide-react-taro'
@@ -28,6 +28,10 @@ const IndexPage = () => {
   const [loading, setLoading] = useState(false)
 
   useLoad(() => {
+    fetchEditors()
+  })
+
+  useDidShow(() => {
     fetchEditors()
   })
 
