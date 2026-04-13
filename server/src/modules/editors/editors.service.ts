@@ -15,11 +15,11 @@ export class EditorsService {
     return data
   }
 
-  async create(name: string, price: string) {
+  async create(name: string, price: string, default_count: number = 1) {
     const client = getSupabaseClient()
     const { data, error } = await client
       .from('editors')
-      .insert({ name, price })
+      .insert({ name, price, default_count })
       .select()
       .single()
 
@@ -27,7 +27,7 @@ export class EditorsService {
     return data
   }
 
-  async update(id: number, updates: { name?: string; price?: string; is_active?: boolean }) {
+  async update(id: number, updates: { name?: string; price?: string; default_count?: number; is_active?: boolean }) {
     const client = getSupabaseClient()
     const { data, error } = await client
       .from('editors')

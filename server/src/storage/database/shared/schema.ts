@@ -13,6 +13,7 @@ export const editors = pgTable(
     id: serial("id").primaryKey(),
     name: varchar("name", { length: 100 }).notNull(),
     price: numeric("price", { precision: 10, scale: 2 }).notNull().default("16.00"),
+    default_count: integer("default_count").notNull().default(1),
     is_active: boolean("is_active").default(true).notNull(),
     created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { withTimezone: true }),

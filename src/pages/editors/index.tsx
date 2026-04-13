@@ -9,6 +9,7 @@ interface Editor {
   id: number
   name: string
   price: number
+  default_count: number
   is_active: boolean
 }
 
@@ -17,6 +18,7 @@ const EditorsPage = () => {
   const [showAddModal, setShowAddModal] = useState(false)
   const [newName, setNewName] = useState('')
   const [newPrice, setNewPrice] = useState('16')
+  const [newDefaultCount, setNewDefaultCount] = useState('1')
 
   useEffect(() => {
     fetchEditors()
@@ -45,6 +47,10 @@ const EditorsPage = () => {
       console.log('请输入有效的价格')
       return
     }
+    if (!newDefaultCount || parseInt(newDefaultCount) <= 0) {
+      console.log('请输入有效的默认稿件数量')
+      return
+    }
 
     try {
       const res = await Network.request({
@@ -52,12 +58,14 @@ const EditorsPage = () => {
         method: 'POST',
         data: {
           name: newName.trim(),
-          price: newPrice
+          price: newPrice,
+          default_count: parseInt(newDefaultCount)
         }
       })
       console.log('添加成功', res.data)
       setNewName('')
       setNewPrice('16')
+      setNewDefaultCount('1')
       setShowAddModal(false)
       fetchEditors()
     } catch (error) {
@@ -84,6 +92,20 @@ const EditorsPage = () => {
         url: `/api/editors/${id}`,
         method: 'PUT',
         data: { price }
+      })
+      console.log('更新成功', res.data)
+      fetchEditors()
+    } catch (error) {
+      console.error('更新失败', error)
+    }
+  }
+
+  const handleUpdateDefaultCount = async (id: number, defaultCount: string) => {
+    try {
+      const res = await Network.request({
+        url: `/api/editors/${id}`,
+        method: 'PUT',
+        data: { default_count: parseInt(defaultCount) }
       })
       console.log('更新成功', res.data)
       fetchEditors()
@@ -122,7 +144,7 @@ const EditorsPage = () => {
                 <Trash2 size={16} color="#dc2626" />
               </Button>
             </View>
-            <View className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
+            <View className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 mb-2">
               <Text className="block text-sm text-gray-600">单价（元/条）</Text>
               <View className="flex items-center gap-2">
                 <Input
@@ -133,6 +155,19 @@ const EditorsPage = () => {
                   onBlur={() => handleUpdatePrice(editor.id, editor.price.toString())}
                 />
                 <Text className="text-sm text-gray-500">元</Text>
+              </View>
+            </View>
+            <View className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
+              <Text className="block text-sm text-gray-600">默认稿件数量</Text>
+              <View className="flex items-center gap-2">
+                <Input
+                  className="w-20 bg-white text-right text-sm"
+                  type="number"
+                  value={editor.default_count.toString()}
+                  onInput={(e) => setNewDefaultCount(e.detail.value)}
+                  onBlur={() => handleUpdateDefaultCount(editor.id, editor.default_count.toString())}
+                />
+                <Text className="text-sm text-gray-500">条</Text>
               </View>
             </View>
           </View>
@@ -158,7 +193,7 @@ const EditorsPage = () => {
                 onInput={(e) => setNewName(e.detail.value)}
               />
             </View>
-            <View className="mb-6">
+            <View className="mb-4">
               <Text className="block text-sm font-medium text-gray-700 mb-2">单价（元/条）</Text>
               <Input
                 className="w-full bg-gray-50"
@@ -166,6 +201,16 @@ const EditorsPage = () => {
                 placeholder="输入单价"
                 value={newPrice}
                 onInput={(e) => setNewPrice(e.detail.value)}
+              />
+            </View>
+            <View className="mb-6">
+              <Text className="block text-sm font-medium text-gray-700 mb-2">默认稿件数量</Text>
+              <Input
+                className="w-full bg-gray-50"
+                type="number"
+                placeholder="输入默认稿件数量"
+                value={newDefaultCount}
+                onInput={(e) => setNewDefaultCount(e.detail.value)}
               />
             </View>
             <View className="flex gap-3">

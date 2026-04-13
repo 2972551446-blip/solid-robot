@@ -1,12 +1,57 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common'
 import { getSupabaseClient } from '../../storage/database/supabase-client'
 
+interface WorkInput {
+  editor_id: number
+  date: string
+  count: number
+  title: string
+}
+
+interface BatchResult {
+  success: any[]
+  failed: Array<{ editor_id: number; error: string }>
+  total: number
+  successCount: number
+  failedCount: number
+}
+
 @Injectable()
 export class WorksService {
   async create(editor_id: number, date: string, count: number, title: string) {
+    return this.createSingle({ editor_id, date, count, title })
+  }
+
+  async createBatch(inputs: WorkInput[]): Promise<BatchResult> {
+    const success: any[] = []
+    const failed: Array<{ editor_id: number; error: string }> = []
+
+    for (const input of inputs) {
+      try {
+        const result = await this.createSingle(input)
+        success.push(result)
+      } catch (error: any) {
+        failed.push({ editor_id: input.editor_id, error: error.message })
+      }
+    }
+
+    return {
+      success,
+      failed,
+      total: inputs.length,
+      successCount: success.length,
+      failedCount: failed.length
+    }
+  }
+
+  private async createSingle(input: WorkInput) {
+    const { editor_id, date, count, title } = input
     const client = getSupabaseClient()
 
-    // 检查剪辑师是否存在
+    if (count <= 0) {
+      throw new HttpException('稿件数量必须大于0', HttpStatus.BAD_REQUEST)
+    }
+
     const { data: editor, error: editorError } = await client
       .from('editors')
       .select('*')
@@ -16,11 +61,9 @@ export class WorksService {
     if (editorError) throw new HttpException(`查询剪辑师失败: ${editorError.message}`, HttpStatus.INTERNAL_SERVER_ERROR)
     if (!editor) throw new HttpException('剪辑师不存在', HttpStatus.NOT_FOUND)
 
-    // 检查是否为周日（单休）
     const workDate = new Date(date)
     const dayOfWeek = workDate.getDay()
 
-    // 检查是否为节假日
     const year = workDate.getFullYear()
     const { data: holidays, error: holidayError } = await client
       .from('holidays')
@@ -34,15 +77,12 @@ export class WorksService {
     const isHoliday = !!holidays
     const isSunday = dayOfWeek === 0
 
-    // 如果是周日且不是节假日加班，禁止录入
     if (isSunday && !isHoliday) {
       throw new HttpException('周日不需要录入稿件（除非节假日加班）', HttpStatus.BAD_REQUEST)
     }
 
-    // 获取剪辑师当前单价（锁定价格）
     const price = parseFloat(editor.price as string)
 
-    // 插入稿件记录
     const { data: work, error: workError } = await client
       .from('works')
       .insert({

@@ -17,6 +17,24 @@ export class WorksController {
     }
   }
 
+  @Post('batch')
+  @HttpCode(HttpStatus.OK)
+  async createBatch(@Body() body: { works: Array<{ editor_id: number; date: string; count: number; title: string }> }) {
+    const { works } = body
+    const result = await this.worksService.createBatch(works)
+    return {
+      code: 200,
+      message: `批量录入完成：成功 ${result.successCount} 条，失败 ${result.failedCount} 条`,
+      data: {
+        success: result.success,
+        failed: result.failed,
+        total: result.total,
+        successCount: result.successCount,
+        failedCount: result.failedCount
+      }
+    }
+  }
+
   @Get('by-date')
   async findByDate(@Query('date') date: string) {
     const result = await this.worksService.findByDate(date)
