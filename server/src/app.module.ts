@@ -6,10 +6,11 @@ import { EditorsModule } from './modules/editors/editors.module'
 import { TasksModule } from './modules/tasks/tasks.module'
 import { AdminsModule } from './modules/admins/admins.module'
 import { AuthModule } from './modules/auth/auth.module'
+import { HealthController } from './health.controller'
 
 @Module({
   imports: [WorksModule, EditorsModule, TasksModule, AdminsModule, AuthModule],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
   providers: [AppService],
 })
 export class AppModule {}
