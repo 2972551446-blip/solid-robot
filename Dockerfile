@@ -34,6 +34,7 @@ RUN pnpm install --prod --frozen-lockfile
 
 # 从构建阶段复制构建产物
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/dist-web ./dist-web
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # 设置环境变量
