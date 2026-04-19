@@ -1,18 +1,15 @@
-# 简化版 Dockerfile - 本地已经构建好，云端只需要装依赖启动
+# 极简版 Dockerfile - 只安装 server 需要的依赖
 FROM node:20-alpine
 
 WORKDIR /app
 
-# 安装 pnpm
-RUN npm install -g pnpm@latest
+# 先只复制 server 的 package.json
+COPY server/package.json ./server/
 
-# 复制 package.json 和 lock 文件
-COPY package.json pnpm-lock.yaml ./
+# 安装 server 生产依赖
+RUN cd server && npm install --production
 
-# 只安装生产依赖
-RUN pnpm install --prod --frozen-lockfile
-
-# 复制已经构建好的产物 (本地已经构建完成)
+# 复制已经构建好的所有产物
 COPY . .
 
 # 设置环境变量
@@ -22,5 +19,5 @@ ENV PORT=3000
 # 暴露端口
 EXPOSE 3000
 
-# 启动应用
-CMD ["pnpm", "run", "start:prod"]
+# 启动应用，server/dist/main.js 已经构建好了
+CMD ["node", "server/dist/main.js"]
