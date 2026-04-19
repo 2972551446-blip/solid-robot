@@ -11,7 +11,7 @@ RUN npm install -g pnpm@latest
 # 复制 package.json 和 pnpm-lock.yaml
 COPY package.json pnpm-lock.yaml ./
 
-# 安装依赖
+# 安装全部依赖
 RUN pnpm install --frozen-lockfile
 
 # 复制源代码
@@ -20,17 +20,19 @@ COPY . .
 # 构建项目
 RUN pnpm build
 
+# 清理开发依赖，只保留生产依赖
+RUN pnpm prune --prod
+
 # 阶段2: 生产阶段
 FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# 安装 pnpm - 只需要装一次
+# 安装 pnpm
 RUN npm install -g pnpm@latest
 
-# 从构建阶段复制 node_modules (只保留生产依赖已经在构建时处理了)
+# 从构建阶段复制已经清理过的依赖和构建产物
 COPY --from=builder /app/node_modules ./node_modules
-# 复制构建产物
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/dist-web ./dist-web
