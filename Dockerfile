@@ -1,41 +1,19 @@
-# 多阶段构建 Dockerfile - 优化版，更快构建
-
-# 阶段1: 构建阶段
-FROM node:20-alpine AS builder
+# 简化版 Dockerfile - 本地已经构建好，云端只需要装依赖启动
+FROM node:20-alpine
 
 WORKDIR /app
 
 # 安装 pnpm
 RUN npm install -g pnpm@latest
 
-# 复制 package.json 和 pnpm-lock.yaml
+# 复制 package.json 和 lock 文件
 COPY package.json pnpm-lock.yaml ./
 
-# 安装全部依赖
-RUN pnpm install --frozen-lockfile
+# 只安装生产依赖
+RUN pnpm install --prod --frozen-lockfile
 
-# 复制源代码
+# 复制已经构建好的产物 (本地已经构建完成)
 COPY . .
-
-# 构建项目
-RUN pnpm build
-
-# 清理开发依赖，只保留生产依赖
-RUN pnpm prune --prod
-
-# 阶段2: 生产阶段
-FROM node:20-alpine AS runner
-
-WORKDIR /app
-
-# 安装 pnpm
-RUN npm install -g pnpm@latest
-
-# 从构建阶段复制已经清理过的依赖和构建产物
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/dist-web ./dist-web
 
 # 设置环境变量
 ENV NODE_ENV=production

@@ -4,9 +4,9 @@ node_modules/
 node-compile-cache/
 
 # Production
-dist/
-build/
-dist-*/
+# dist/ - 我们在本地构建好提交到 GitHub，让云端直接用
+# build/
+# dist-*/
 
 # Misc
 .DS_Store
